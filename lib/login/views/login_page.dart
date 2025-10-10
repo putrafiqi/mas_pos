@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mas_pos/common/common.dart';
+import 'package:mas_pos/data/data.dart';
 import 'package:mas_pos/login/login.dart';
 
 class LoginPage extends StatelessWidget {
@@ -10,7 +12,24 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LoginView();
+    return BlocProvider(
+      create: (context) => LoginBloc(context.read<AuthRepository>()),
+      child: BlocListener<LoginBloc, LoginState>(
+        listener: (context, state) {
+          if (state.status == LoginStatus.success) {
+            context.read<AuthBloc>().add(AuthChangeRequested());
+            Navigator.pop(context);
+          } else if (state.status == LoginStatus.failure) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                AppSnackBar(message: state.errorMessage!, isError: true),
+              );
+          }
+        },
+        child: const LoginView(),
+      ),
+    );
   }
 }
 

@@ -1,21 +1,51 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mas_pos/common/common.dart';
+import 'package:mas_pos/data/data.dart';
+import 'package:mas_pos/home/home.dart';
 import 'package:mas_pos/login/login.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() {
-  runApp(const App());
+  if (kDebugMode) {
+    // To solve CERTIFICATE_VERIFY_FAILED
+    HttpOverrides.global = KHttpOverrides();
+  }
+  final secureStorage = FlutterSecureStorage();
+  runApp(App(storage: secureStorage));
 }
 
 class App extends StatelessWidget {
-  const App({super.key});
+  const App({super.key, required this.storage});
+  final FlutterSecureStorage storage;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-
-      theme: AppTheme.light,
-      home: const AppView(),
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<AuthRemoteDataSource>(
+          create: (context) => AuthRemoteDataSourceImpl(storage: storage),
+        ),
+        RepositoryProvider(
+          create:
+              (context) => AuthRepository(context.read<AuthRemoteDataSource>()),
+        ),
+      ],
+      child: BlocProvider(
+        create:
+            (context) =>
+                AuthBloc(context.read<AuthRepository>())
+                  ..add(AuthChangeRequested()),
+        child: MaterialApp(
+          theme: AppTheme.light,
+          home: const AppView(),
+          title: 'MasPOS',
+          debugShowCheckedModeBanner: false,
+        ),
+      ),
     );
   }
 }
@@ -25,40 +55,52 @@ class AppView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Stack(
-        children: [
-          //Image
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.white, Color(0xFF2C59E5)],
-              ),
-              image: DecorationImage(
-                alignment: Alignment.bottomCenter,
-                image: AssetImage(AssetString.splashImage2),
-              ),
-            ),
-          ),
-          // White Overlay
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: [0.1, 1],
-                colors: [Colors.white, Colors.white.withAlpha(100)],
-              ),
-            ),
-          ),
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          return HomePage();
+        } else if (state.status == AuthStatus.unauthenticated) {
+          return SafeArea(
+            child: Stack(
+              children: [
+                //Image
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.white, Color(0xFF2C59E5)],
+                    ),
+                    image: DecorationImage(
+                      alignment: Alignment.bottomCenter,
+                      image: AssetImage(AssetString.splashImage2),
+                    ),
+                  ),
+                ),
+                // White Overlay
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: [0.1, 1],
+                      colors: [Colors.white, Colors.white.withAlpha(100)],
+                    ),
+                  ),
+                ),
 
-          _SloganText(),
+                _SloganText(),
 
-          _ButtonNext(),
-        ],
-      ),
+                _ButtonNext(),
+              ],
+            ),
+          );
+        }
+        return ColoredBox(
+          color: Colors.white,
+          child: Center(child: CircularProgressIndicator.adaptive()),
+        );
+      },
     );
   }
 }
