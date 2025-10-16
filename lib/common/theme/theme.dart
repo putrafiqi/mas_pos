@@ -5,7 +5,7 @@ class AppTheme {
   const AppTheme._();
 
   static final light = ThemeData(
-    colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+    colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF2C59E5)),
     textTheme: GoogleFonts.plusJakartaSansTextTheme(),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(

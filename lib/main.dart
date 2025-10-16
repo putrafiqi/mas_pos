@@ -8,11 +8,13 @@ import 'package:mas_pos/data/data.dart';
 import 'package:mas_pos/home/home.dart';
 import 'package:mas_pos/login/login.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:talker_bloc_logger/talker_bloc_logger.dart';
 
 void main() {
   if (kDebugMode) {
     // To solve CERTIFICATE_VERIFY_FAILED
     HttpOverrides.global = KHttpOverrides();
+    Bloc.observer = TalkerBlocObserver();
   }
   final secureStorage = FlutterSecureStorage();
   runApp(App(storage: secureStorage));
@@ -32,6 +34,19 @@ class App extends StatelessWidget {
         RepositoryProvider(
           create:
               (context) => AuthRepository(context.read<AuthRemoteDataSource>()),
+        ),
+        RepositoryProvider<CatalogRemoteDataSource>(
+          create: (context) => CatalogRemoteDataSourceImpl(storage: storage),
+        ),
+        RepositoryProvider(
+          create:
+              (context) =>
+                  ProductRepository(context.read<CatalogRemoteDataSource>()),
+        ),
+        RepositoryProvider(
+          create:
+              (context) =>
+                  CategoryRepository(context.read<CatalogRemoteDataSource>()),
         ),
       ],
       child: BlocProvider(
