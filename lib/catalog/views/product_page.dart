@@ -100,7 +100,7 @@ class ProductView extends StatelessWidget {
                 ),
               ),
             ),
-            const Gap(24),
+            const Gap(16),
             Container(
               color: Colors.white,
               padding: EdgeInsets.all(16),

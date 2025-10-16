@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:mas_pos/cart/cart.dart';
 import 'package:mas_pos/data/data.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mas_pos/catalog/catalog.dart';
@@ -156,11 +157,34 @@ class ProductCard extends StatelessWidget {
           ),
           const Gap(8),
           if (showCartButton)
-            FilledButton.icon(
-              label: Text('Keranjang'),
+            BlocBuilder<CartBloc, CartState>(
+              buildWhen:
+                  (previous, current) => previous.cartList != current.cartList,
+              builder: (context, state) {
+                if (state.isInCart(product)) {
+                  final cartItem = state.cartList.firstWhere(
+                    (item) => item.product == product,
+                  );
+                  return QuantityCounter(
+                    initialValue: cartItem.quantity,
+                    onChanged: (value) {
+                      if (value > cartItem.quantity) {
+                        context.read<CartBloc>().add(CartItemAdded(product));
+                      } else {
+                        context.read<CartBloc>().add(CartItemRemoved(cartItem));
+                      }
+                    },
+                  );
+                }
+                return FilledButton.icon(
+                  label: Text('Keranjang'),
 
-              onPressed: () {},
-              icon: Icon(Icons.add),
+                  onPressed: () {
+                    context.read<CartBloc>().add(CartItemAdded(product));
+                  },
+                  icon: Icon(Icons.add),
+                );
+              },
             ),
         ],
       ),

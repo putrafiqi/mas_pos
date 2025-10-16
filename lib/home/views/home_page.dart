@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:mas_pos/cart/cart.dart';
 import 'package:mas_pos/common/common.dart';
 import 'package:mas_pos/data/data.dart';
 import 'package:mas_pos/home/home.dart';
@@ -26,6 +27,7 @@ class HomePage extends StatelessWidget {
                   CategoryBloc(context.read<CategoryRepository>())
                     ..add(GetAllCategory()),
         ),
+        BlocProvider(create: (context) => CartBloc()..add(CartStarted())),
       ],
       child: const HomeView(),
     );
@@ -58,154 +60,152 @@ class _HomeViewState extends State<HomeView> {
           ),
         ),
       ),
-      body: IndexedStack(
-        index: selectedIndex,
-        children: [
-          SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedIndex = 1;
-                      });
-                    },
-                    child: ProductSearchField(readOnly: true),
-                  ),
-                  const Gap(24),
-                  CaroulselBenner(),
-                  const Gap(24),
-                  Container(
-                    decoration: BoxDecoration(color: Colors.white),
-                    padding: EdgeInsets.only(left: 16, top: 16, bottom: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Diminati pembeli',
-                          style: textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: Colors.grey.shade800,
-                          ),
-                        ),
-                        const Gap(16),
-                        SizedBox(
-                          height: 225,
-                          child: BlocBuilder<ProductBloc, ProductState>(
-                            builder: (context, state) {
-                              if (state.status == ProductStatus.loading) {
-                                return Center(
-                                  child: CircularProgressIndicator.adaptive(),
-                                );
-                              }
-
-                              return ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                itemBuilder: (context, index) {
-                                  final product = state.allProductList[index];
-
-                                  return ProductCard(product: product);
-                                },
-                                itemCount: state.allProductList.length,
-                                separatorBuilder:
-                                    (context, index) => const Gap(16),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const Gap(16),
-
-                  Container(
-                    decoration: BoxDecoration(color: Colors.white),
-                    padding: EdgeInsets.only(left: 16, top: 16, bottom: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Produk yang dijual',
-                              style: textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey.shade800,
-                              ),
+      body: RefreshIndicator.adaptive(
+        onRefresh: () async {
+          context.read<ProductBloc>().add(GetAllProduct());
+          context.read<CategoryBloc>().add(GetAllCategory());
+        },
+        child: IndexedStack(
+          index: selectedIndex,
+          children: [
+            SafeArea(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Gap(24),
+                    CaroulselBenner(),
+                    const Gap(24),
+                    Container(
+                      decoration: BoxDecoration(color: Colors.white),
+                      padding: EdgeInsets.only(left: 16, top: 16, bottom: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Diminati pembeli',
+                            style: textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: Colors.grey.shade800,
                             ),
+                          ),
+                          const Gap(16),
+                          SizedBox(
+                            height: 225,
+                            child: BlocBuilder<ProductBloc, ProductState>(
+                              builder: (context, state) {
+                                if (state.status == ProductStatus.loading) {
+                                  return Center(
+                                    child: CircularProgressIndicator.adaptive(),
+                                  );
+                                }
 
-                            TextButton.icon(
-                              onPressed: () {
-                                setState(() {
-                                  selectedIndex = 1;
-                                });
+                                return ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  itemBuilder: (context, index) {
+                                    final product = state.allProductList[index];
+
+                                    return ProductCard(product: product);
+                                  },
+                                  itemCount: state.allProductList.length,
+                                  separatorBuilder:
+                                      (context, index) => const Gap(16),
+                                );
                               },
-                              label: Text(
-                                'Lihat Semua',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const Gap(16),
+
+                    Container(
+                      decoration: BoxDecoration(color: Colors.white),
+                      padding: EdgeInsets.only(left: 16, top: 16, bottom: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Produk yang dijual',
                                 style: textTheme.bodyLarge?.copyWith(
-                                  color: Colors.blue.shade800,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey.shade800,
                                 ),
                               ),
-                              icon: Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                color: Colors.blue.shade800,
-                              ),
-                              iconAlignment: IconAlignment.end,
-                            ),
-                          ],
-                        ),
-                        const Gap(16),
-                        SizedBox(
-                          height: 225,
-                          child: BlocBuilder<ProductBloc, ProductState>(
-                            builder: (context, state) {
-                              if (state.status == ProductStatus.loading) {
-                                return Center(
-                                  child: CircularProgressIndicator.adaptive(),
-                                );
-                              }
-                              return ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                itemBuilder: (context, index) {
-                                  final product = state.allProductList[index];
-                                  return ProductCard(product: product);
-                                },
-                                itemCount: state.allProductList.length,
-                                separatorBuilder:
-                                    (context, index) => const Gap(16),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Gap(16),
 
-                  Text(
-                    '-  MASPOS Versi 1.0  -',
-                    textAlign: TextAlign.center,
-                    style: textTheme.labelSmall,
-                  ),
-                  const Gap(16),
-                ],
+                              TextButton.icon(
+                                onPressed: () {
+                                  setState(() {
+                                    selectedIndex = 1;
+                                  });
+                                },
+                                label: Text(
+                                  'Lihat Semua',
+                                  style: textTheme.bodyLarge?.copyWith(
+                                    color: Colors.blue.shade800,
+                                  ),
+                                ),
+                                icon: Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  color: Colors.blue.shade800,
+                                ),
+                                iconAlignment: IconAlignment.end,
+                              ),
+                            ],
+                          ),
+                          const Gap(16),
+                          SizedBox(
+                            height: 225,
+                            child: BlocBuilder<ProductBloc, ProductState>(
+                              builder: (context, state) {
+                                if (state.status == ProductStatus.loading) {
+                                  return Center(
+                                    child: CircularProgressIndicator.adaptive(),
+                                  );
+                                }
+                                return ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  itemBuilder: (context, index) {
+                                    final product = state.allProductList[index];
+                                    return ProductCard(product: product);
+                                  },
+                                  itemCount: state.allProductList.length,
+                                  separatorBuilder:
+                                      (context, index) => const Gap(16),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Gap(16),
+
+                    Text(
+                      '-  MASPOS Versi 1.0  -',
+                      textAlign: TextAlign.center,
+                      style: textTheme.labelSmall,
+                    ),
+                    const Gap(16),
+                  ],
+                ),
               ),
             ),
-          ),
-          ProductPage(),
-          Center(
-            child: FilledButton(
-              onPressed: () {
-                context.read<AuthBloc>().add(AuthLogoutPressed());
-              },
-              child: Text('Logout'),
+            ProductPage(),
+            Center(
+              child: FilledButton(
+                onPressed: () {
+                  context.read<AuthBloc>().add(AuthLogoutPressed());
+                },
+                child: Text('Logout'),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
@@ -232,85 +232,126 @@ class _HomeViewState extends State<HomeView> {
 
       floatingActionButton:
           selectedIndex == 1
-              ? FloatingActionButton(
-                onPressed: () {
-                  showModalBottomSheet(
-                    isDismissible: false,
-                    showDragHandle: true,
-                    context: context,
-                    builder: (_) {
-                      return MultiBlocProvider(
-                        providers: [
-                          BlocProvider.value(
-                            value: context.read<ProductBloc>(),
-                          ),
-                          BlocProvider.value(
-                            value: context.read<CategoryBloc>(),
-                          ),
-                        ],
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              _ButtonCard(
-                                titleText: 'Tambah Kategori',
-                                supportText: 'Buat produkmu lebih rapi',
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  showModalBottomSheet(
-                                    showDragHandle: true,
-                                    isDismissible: false,
-                                    context: context,
-                                    builder:
-                                        (_) => BlocProvider.value(
-                                          value: context.read<CategoryBloc>(),
-                                          child: FormAddCategory(),
-                                        ),
-                                  );
-                                },
+              ? BlocBuilder<CartBloc, CartState>(
+                builder: (context, state) {
+                  final isCartEmpty = state.cartList.isEmpty;
+
+                  final VoidCallback onFabPressed =
+                      isCartEmpty
+                          ? () {
+                            showModalBottomSheet(
+                              context: context,
+                              isDismissible: false,
+                              showDragHandle: true,
+                              builder: (_) => _buildAddOptionsModal(context),
+                            );
+                          }
+                          : () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => BlocProvider.value(
+                                      value: context.read<CartBloc>(),
+                                      child: CartPage(),
+                                    ),
                               ),
-                              _ButtonCard(
-                                titleText: 'Tambah Produk',
-                                supportText: 'Tambahin makanan atau minuman ',
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  showModalBottomSheet(
-                                    isDismissible: false,
-                                    showDragHandle: true,
-                                    isScrollControlled: true,
-                                    context: context,
-                                    builder: (_) {
-                                      return MultiBlocProvider(
-                                        providers: [
-                                          BlocProvider.value(
-                                            value: context.read<ProductBloc>(),
-                                          ),
-                                          BlocProvider.value(
-                                            value: context.read<CategoryBloc>(),
-                                          ),
-                                        ],
-                                        child: FormAddProduct(),
-                                      );
-                                    },
-                                  );
-                                },
+                            );
+                          };
+
+                  final Widget fabIcon =
+                      isCartEmpty
+                          ? const Icon(Iconsax.add_copy)
+                          : Stack(
+                            alignment: Alignment.center,
+                            clipBehavior: Clip.none,
+                            children: [
+                              const Icon(Iconsax.bag_2_copy),
+                              Positioned(
+                                top: -16,
+                                right: -16,
+                                child: CircleAvatar(
+                                  radius: 10,
+                                  backgroundColor: Colors.red,
+                                  child: Text(
+                                    '${state.totalUniqueItems}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ],
-                          ),
-                        ),
-                      );
-                    },
+                          );
+
+                  return FloatingActionButton(
+                    onPressed: onFabPressed,
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFF2C59E5),
+                    shape: const CircleBorder(),
+                    child: fabIcon,
                   );
                 },
-
-                foregroundColor: Colors.white,
-                backgroundColor: Color(0xFF2C59E5),
-                shape: CircleBorder(),
-                child: Icon(Iconsax.add_copy),
               )
               : null,
+    );
+  }
+
+  Widget _buildAddOptionsModal(BuildContext pageContext) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: context.read<ProductBloc>()),
+        BlocProvider.value(value: context.read<CategoryBloc>()),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _ButtonCard(
+              titleText: 'Tambah Kategori',
+              supportText: 'Buat produkmu lebih rapi',
+              onTap: () {
+                Navigator.pop(context);
+                showModalBottomSheet(
+                  showDragHandle: true,
+                  isDismissible: false,
+                  context: context,
+                  builder:
+                      (_) => BlocProvider.value(
+                        value: context.read<CategoryBloc>(),
+                        child: FormAddCategory(),
+                      ),
+                );
+              },
+            ),
+            _ButtonCard(
+              titleText: 'Tambah Produk',
+              supportText: 'Tambahin makanan atau minuman ',
+              onTap: () {
+                Navigator.pop(context);
+                showModalBottomSheet(
+                  isDismissible: false,
+                  showDragHandle: true,
+                  isScrollControlled: true,
+                  context: context,
+                  builder: (_) {
+                    return MultiBlocProvider(
+                      providers: [
+                        BlocProvider.value(value: context.read<ProductBloc>()),
+                        BlocProvider.value(value: context.read<CategoryBloc>()),
+                      ],
+                      child: FormAddProduct(),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
