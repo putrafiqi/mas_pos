@@ -51,5 +51,12 @@
 <array>
     <string>UIInterfaceOrientationPortrait</string>
 </array>
+
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Aplikasi ini memerlukan akses ke galeri untuk memilih foto.</string>
+<key>NSCameraUsageDescription</key>
+<string>Aplikasi ini memerlukan akses ke kamera untuk mengambil foto.</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>Aplikasi ini memerlukan akses ke mikrofon untuk merekam video.</string>
 </dict>
 </plist>
