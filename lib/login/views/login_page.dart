@@ -38,27 +38,29 @@ class LoginView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Stack(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.white, Color(0xFF2C59E5)],
-                  ),
-                ),
-                child: Image.asset(
-                  AssetString.splashImage2,
-                  alignment: Alignment.topCenter,
+        child: Stack(
+          children: [
+            Container(
+              height: screenHeight * 0.4,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.white, Color(0xFF2C59E5)],
                 ),
               ),
-              LoginForm(),
-            ],
-          ),
+              child: Image.asset(
+                AssetString.splashImage2,
+                alignment: Alignment.topCenter,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const LoginForm(),
+          ],
         ),
       ),
     );

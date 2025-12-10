@@ -18,93 +18,93 @@ class _LoginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
     final textTheme = TextTheme.of(context);
-    return Positioned(
-      top: 200,
-      bottom: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        padding: EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(16),
-            topRight: Radius.circular(16),
-          ),
-        ),
-        child: Form(
-          key: loginFormKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const _GreetingText(),
+    final screenHeight = MediaQuery.sizeOf(context).height;
 
-              const Gap(32),
-
-              Text('Username', style: textTheme.titleSmall),
-              const Gap(8),
-              Flexible(
-                child: TextFormField(
-                  controller: emailController,
-                  decoration: InputDecoration(hintText: 'Email'),
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  validator: (value) {
-                    if (value != null &&
-                        value.contains(
-                          RegExp(
-                            r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-                          ),
-                        )) {
-                      return null;
-                    }
-                    return 'Masukan email yang valid';
-                  },
-                ),
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(top: screenHeight * 0.25),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
               ),
-              const Gap(24),
-              Text('Password', style: textTheme.titleSmall),
-              const Gap(8),
-              Flexible(
-                child: TextFormField(
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                    hintText: 'Password',
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          isHidePassword = !isHidePassword;
-                        });
-                      },
-                      icon:
-                          isHidePassword
-                              ? Icon(Icons.visibility_off_outlined)
-                              : Icon(Icons.visibility_outlined),
+            ),
+            child: Form(
+              key: loginFormKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const _GreetingText(),
+
+                  const Gap(32),
+
+                  Text('Username', style: textTheme.titleSmall),
+                  const Gap(8),
+                  TextFormField(
+                    controller: emailController,
+                    decoration: InputDecoration(hintText: 'Email'),
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    validator: (value) {
+                      if (value != null &&
+                          value.contains(
+                            RegExp(
+                              r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                            ),
+                          )) {
+                        return null;
+                      }
+                      return 'Masukan email yang valid';
+                    },
+                  ),
+                  const Gap(24),
+                  Text('Password', style: textTheme.titleSmall),
+                  const Gap(8),
+                  TextFormField(
+                    controller: passwordController,
+                    decoration: InputDecoration(
+                      hintText: 'Password',
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            isHidePassword = !isHidePassword;
+                          });
+                        },
+                        icon:
+                            isHidePassword
+                                ? Icon(Icons.visibility_off_outlined)
+                                : Icon(Icons.visibility_outlined),
+                      ),
+                    ),
+                    obscureText: isHidePassword,
+                  ),
+                  const Gap(32),
+                  FilledButton(
+                    onPressed: () {
+                      if (loginFormKey.currentState!.validate()) {
+                        context.read<LoginBloc>().add(
+                          LoginPressed(
+                            emailController.text,
+                            passwordController.text,
+                          ),
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      child: const Text('Masuk'),
                     ),
                   ),
-                  obscureText: isHidePassword,
-                ),
+                ],
               ),
-              const Gap(32),
-              FilledButton(
-                onPressed: () {
-                  if (loginFormKey.currentState!.validate()) {
-                    context.read<LoginBloc>().add(
-                      LoginPressed(
-                        emailController.text,
-                        passwordController.text,
-                      ),
-                    );
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  child: const Text('Masuk'),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
